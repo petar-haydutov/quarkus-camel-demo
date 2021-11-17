@@ -11,10 +11,13 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.mycompany.camel.quarkus.exceptions.CustomException;
 import org.mycompany.camel.quarkus.models.Fruit;
 
 @ApplicationScoped
 public class FruitRoutes extends RouteBuilder {
+    public static final String ROTTEN_FOOD_PROCESSOR = "rottenFoodProcessor";
+    public static final String FRESH_FOOD_PROCESSOR = "freshFoodProcessor";
 
     private final Set<Fruit> fruits = Collections.synchronizedSet(new LinkedHashSet<>());
 
@@ -30,23 +33,27 @@ public class FruitRoutes extends RouteBuilder {
     @Override
     public void configure() {
         restConfiguration().bindingMode(RestBindingMode.json);
+        // configureExceptionHandlingForRoute();
         configureTestRoute();
     }
 
     private void configureTestRoute() {
-        // onException(Throwable.class).process(exchange -> {
-        // Exception exception = (Exception) exchange.getProperty(Exchange.EXCEPTION_CAUGHT);
-        // log.error(exception.getMessage());
-        // })
-        // .setBody().constant("Exception caught").log("message");
-
-        rest("/fruits").get().type(Fruit.class).route().setBody(constant(fruits))
-                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200)).endRest()
+        rest("/fruits").get().type(Fruit.class).route().setBody(constant(fruits)).process(exchange -> {
+            throw new CustomException("Throwing a custom exception for demo purposes");
+        }).setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200)).endRest()
 
                 .post().type(Fruit.class).route().filter(e -> {
                     Fruit fruit = (Fruit) e.getIn().getBody();
                     return !fruit.isFresh();
-                }).to("log:rottenFruit").process("rottenFoodProcessor").stop().end().to("log:freshFruit").process()
-                .body(Fruit.class, fruits::add).process("freshFoodProcessor").endRest();
+                }).to("log:rottenFruit").process(ROTTEN_FOOD_PROCESSOR).stop().end().to("log:freshFruit").process()
+                .body(Fruit.class, fruits::add).process(FRESH_FOOD_PROCESSOR).endRest();
     }
+
+    // private void configureExceptionHandlingForRoute() {
+    // onException(CustomException.class)
+    // .process(exchange -> {
+    // Exception exception = (Exception) exchange.getProperty(Exchange.EXCEPTION_CAUGHT);
+    // log.error(exception.getMessage());
+    // });
+    // }
 }

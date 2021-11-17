@@ -4,9 +4,6 @@ import java.util.Objects;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-/**
- * A REST entity representing a fruit.
- */
 @RegisterForReflection // Lets Quarkus register this class for reflection during the native build
 public class Fruit {
 
