@@ -1,7 +1,7 @@
 # Quarkus-camel-demo
 A demo showcasing how to use apache camel on Quarkus
 
-TIP: Check the https://camel.apache.org/camel-quarkus/latest/first-steps.html[Camel Quarkus User guide] for prerequisites
+TIP: Check the https://camel.apache.org/camel-quarkus/latest/first-steps.html Camel Quarkus User guide for prerequisites
 and other general information.
 
 ### How to start in the Development mode
